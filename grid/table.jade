@@ -1,0 +1,12 @@
+span(ng-transclude)
+.table-responsive
+  table(class='{{grid.tableClass}}')
+    thead
+      tr
+        th.text-center(ng-repeat='header in grid.fields' ng-if='!header.hidden') {{header.name}}
+        th(ng-if='grid.edit')
+    tbody
+      tr(ng-repeat='row in grid.rows')
+        td.text-center(ng-repeat='header in grid.fields' ng-if='!header.hidden') {{row[header.parameter]}}
+        td.text-right(ng-if='grid.edit')
+          a(style='cursor' ng-click='grid.setEditingRow(row)') Edit
