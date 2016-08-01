@@ -1,0 +1,17 @@
+<span ng-transclude="ng-transclude"></span>
+<div class="table-responsive">
+  <table class="{{grid.tableClass}}">
+    <thead>
+      <tr>
+        <th ng-repeat="header in grid.fields" ng-if="!header.hidden" class="text-center">{{header.name}}</th>
+        <th ng-if="grid.edit"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="row in grid.rows">
+        <td ng-repeat="header in grid.fields" ng-if="!header.hidden" class="text-center">{{row[header.parameter]}}</td>
+        <td ng-if="grid.edit" class="text-right"><a style="cursor" ng-click="grid.setEditingRow(row)">Edit</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
