@@ -27,5 +27,5 @@ $scope.urlEdit = "http://api.com/edit";
 <code>position</code> : if field is on array then use this position of such array<br>
 <code>name</code>: name of the parameter comming on the api<br>
 <code>label</code>: name visible of the parameter<br>
-<code>required</code>: if this field is required when editing
+<code>required</code>: if this field is required when editing<br>
 <code>type</code>: there are 3 types <code>bool</code> <code>date</code> and <code>none</code> (none is default)<br> <code>editAs</code>: if you need to edit a field with a diferent parameter name you can change it here
