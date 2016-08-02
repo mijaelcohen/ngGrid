@@ -4,8 +4,8 @@ This is a Angular (1.x) adaptation for Jqgrid:  http://www.trirand.com/blog/
 <h2>Implementation</h2>
 this is a really early version (use at your own risk). I havent made a beta release yet, but im fully working on this plugin. (so keep an eye on this repo :) )<br>
 Include <code>ngGrid</code> into your module like:
-<code>myModule = angular.module('myModule', ['ngGrid'])</code>
-view example:
+<code>myModule = angular.module('myModule', ['ngGrid'])</code><br>
+code example:
 <p>
 <code>
 $scope.url = "http://api.com/get";
