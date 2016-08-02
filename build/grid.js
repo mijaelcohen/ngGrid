@@ -26,13 +26,17 @@
       transclude: true,
       scope: {
         url: "=",
-        edit: "="
+        editUrl: "="
       },
       controller: function($scope, $element, $attrs) {
         $scope.grid = new Grid({
           tableClass: $attrs.tableClass,
           url: $scope.url,
-          edit: $scope.edit != null ? $scope.edit : $scope.edit = false
+          editUrl: $scope.editUrl != null ? $scope.editUrl : $scope.editUrl = false,
+          "delete": $attrs["delete"] ? true : false,
+          add: $attrs.add ? true : false,
+          edit: $attrs.edit ? true : false,
+          search: $attrs.search ? true : false
         });
         $scope.grid.getData();
         return this.getGrid = function() {
@@ -46,40 +50,125 @@
     var $grid;
     return $grid = function(attrs) {
       return {
+        loading: false,
         editingRow: {},
         tableClass: attrs.tableClass,
         fields: [],
         url: attrs.url,
-        edit: attrs.edit,
+        editUrl: attrs.editUrl,
         rows: [],
+        add: attrs.add,
+        edit: attrs.edit,
+        "delete": attrs["delete"],
+        search: attrs.search,
+        action: "",
+        searchOptions: [],
+        searchString: "",
+        searchFilter: "",
         paginator: {
           page: 0,
-          pages: 0
+          totalPages: 0,
+          pages: [],
+          setTotalPages: function() {
+            var max, min;
+            min = this.page - 5;
+            max = this.page + 5;
+            if (min < 1) {
+              min = 1;
+            }
+            if (max > this.totalPages) {
+              max = this.totalPages;
+            }
+            if (max < 1) {
+              max = 1;
+            }
+            return _.range(min, max + 1);
+          }
         },
-        getData: function() {
-          return $http.get(this.url).success((function(_this) {
+        getData: function(page) {
+          var par;
+          this.loading = true;
+          this.paginator.page = page != null ? page : page = 0;
+          par = {
+            page: this.paginator.page,
+            searchField: this.searchFilter.name,
+            searchOper: "eq",
+            searchString: this.searchString,
+            sdix: this.searchFilter.name,
+            sord: "asc"
+          };
+          return $http.get(this.url, {
+            params: par
+          }).success((function(_this) {
             return function(response) {
               _this.rows = response.rows;
-              _this.paginator.pages = response.total;
+              _this.paginator.totalPages = response.total;
               _this.paginator.page = response.page;
-              return _this.records = response.records;
+              _this.records = response.records;
+              _this.paginator.pages = _this.paginator.setTotalPages();
+              return _this.loading = false;
             };
           })(this));
         },
-        editRow: function(row) {
-          return $http.get(this.edit);
+        editRow: function() {
+          var par;
+          par = angular.copy(this.editingRow);
+          par.oper = "edit";
+          this.loading = true;
+          return $http.get(this.editUrl, {
+            params: par
+          }).success((function(_this) {
+            return function(response) {
+              _this.getData(_this.paginator.page);
+              _this.unsetAction();
+              return _this.loading = false;
+            };
+          })(this));
+        },
+        deleteRow: function() {
+          var par;
+          par = angular.copy(this.editingRow);
+          par.oper = "del";
+          this.loading = true;
+          return $http.get(this.editUrl, {
+            params: par
+          }).success((function(_this) {
+            return function(response) {
+              _this.getData();
+              _this.unsetAction();
+              return _this.loading = false;
+            };
+          })(this));
         },
         setEditingRow: function(row) {
+          this.action = "edit";
           return this.editingRow = row;
         },
         addHeader: function(header) {
-          return this.fields.push({
+          this.fields.push({
+            editAs: header.editAs,
+            type: header.type != null ? header.type : "none",
+            position: header.position != null ? header.position : header.position = false,
+            required: header.required != null,
             hidden: header.hidden != null,
             edit: header.edit != null,
             search: header.search != null,
-            parameter: header.name,
-            name: header.label
+            name: header.name,
+            label: header.label
           });
+          if (header.search != null) {
+            this.searchOptions.push({
+              name: header.name,
+              label: header.label
+            });
+            return this.searchFilter = {
+              name: header.name,
+              label: header.label
+            };
+          }
+        },
+        unsetAction: function() {
+          return this.action = "";
         }
       };
     };

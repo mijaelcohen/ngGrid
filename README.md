@@ -1,10 +1,10 @@
 <h1>ngGrid a jqGrid adaptation</h1>
-This is a Angular (1.x) adaptation for Jqgrid:  http://www.trirand.com/blog/ 
+This is a Angular (1.x) adaptation for Jqgrid:  http://www.trirand.com/blog/
 
 <h2>Implementation</h2>
-Include <code>ngGrid</code> into your module like: 
+Include <code>ngGrid</code> into your module like:
 <code>myModule = angular.module('myModule', ['ngGrid'])</code>
-view example: 
+view example:
 <p>
 <code>
 $scope.url = "http://api.com/get";
@@ -20,7 +20,12 @@ $scope.urlEdit = "http://api.com/edit";
 </ng-grid>
 ```
 
-<strong>options:</strong><br>
+<strong>ng-grid-field options:</strong><br>
 <code>hidden</code>: to hide or not this field, by default is false<br>
 <code>edit</code>: this field is editable or not, by default false<br>
 <code>search</code> : to search by this field or not, by default false<br>
+<code>position</code> : if field is on array then use this position of such array<br>
+<code>name</code>: name of the parameter comming on the api<br>
+<code>label</code>: name visible of the parameter<br>
+<code>required</code>: if this field is required when editing
+<code>type</code>: there are 3 types <code>bool</code> <code>date</code> and <code>none</code> (none is default)<br> <code>editAs</code>: if you need to edit a field with a diferent parameter name you can change it here
