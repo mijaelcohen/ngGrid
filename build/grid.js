@@ -36,7 +36,8 @@
           "delete": $attrs["delete"] ? true : false,
           add: $attrs.add ? true : false,
           edit: $attrs.edit ? true : false,
-          search: $attrs.search ? true : false
+          search: $attrs.search ? true : false,
+          readNames: $attrs.readNames ? true : false
         });
         $scope.grid.getData();
         return this.getGrid = function() {
@@ -62,9 +63,12 @@
         "delete": attrs["delete"],
         search: attrs.search,
         action: "",
+        addingRow: {},
         searchOptions: [],
         searchString: "",
         searchFilter: "",
+        deletingRow: {},
+        readNames: attrs.readNames,
         paginator: {
           page: 0,
           totalPages: 0,
@@ -85,11 +89,48 @@
             return _.range(min, max + 1);
           }
         },
+        addRow: function() {
+          var params;
+          this.action = "";
+          if (this.editUrl) {
+            params = angular.copy(this.addingRow);
+            this.loading = true;
+            params.oper = "add";
+            return $http.get(this.editUrl, {
+              params: params
+            }).success((function(_this) {
+              return function(response) {
+                _this.getData(_this.paginator.page);
+                _this.unsetAction();
+                return _this.loading = false;
+              };
+            })(this));
+          } else {
+            return console.error("Edit url not provided!");
+          }
+        },
+        setAddingRow: function() {
+          var header, i, len, ref, results;
+          this.action = "add";
+          ref = this.fields;
+          results = [];
+          for (i = 0, len = ref.length; i < len; i++) {
+            header = ref[i];
+            switch (header.type) {
+              case "bool":
+                results.push(this.addingRow["" + header.name] = false);
+                break;
+              default:
+                results.push(this.addingRow["" + header.name] = "");
+            }
+          }
+          return results;
+        },
         getData: function(page) {
-          var par;
+          var params;
           this.loading = true;
           this.paginator.page = page != null ? page : page = 0;
-          par = {
+          params = {
             page: this.paginator.page,
             searchField: this.searchFilter.name,
             searchOper: "eq",
@@ -98,10 +139,38 @@
             sord: "asc"
           };
           return $http.get(this.url, {
-            params: par
+            params: params
           }).success((function(_this) {
             return function(response) {
-              _this.rows = response.rows;
+              var header, i, idsCounter, index, len, ref, ref1, row;
+              _this.rows = [];
+              _this.action = "";
+              if (_this.readNames) {
+                _this.rows = response.rows;
+              } else {
+                ref = response.rows;
+                for (i = 0, len = ref.length; i < len; i++) {
+                  row = ref[i];
+                  _this.rows.push({});
+                  idsCounter = 0;
+                  ref1 = _this.fields;
+                  for (index in ref1) {
+                    header = ref1[index];
+                    if (header.id) {
+                      idsCounter++;
+                      _this.rows[_this.rows.length - 1]["" + header.name] = row.id;
+                    } else {
+                      switch (header.type) {
+                        case "date":
+                          _this.rows[_this.rows.length - 1]["" + header.name] = new Date(row.cell[index - idsCounter]);
+                          break;
+                        default:
+                          _this.rows[_this.rows.length - 1]["" + header.name] = row.cell[index - idsCounter];
+                      }
+                    }
+                  }
+                }
+              }
               _this.paginator.totalPages = response.total;
               _this.paginator.page = response.page;
               _this.records = response.records;
@@ -111,19 +180,35 @@
           })(this));
         },
         editRow: function() {
-          var par;
-          par = angular.copy(this.editingRow);
-          par.oper = "edit";
-          this.loading = true;
-          return $http.get(this.editUrl, {
-            params: par
-          }).success((function(_this) {
-            return function(response) {
-              _this.getData(_this.paginator.page);
-              _this.unsetAction();
-              return _this.loading = false;
-            };
-          })(this));
+          var params;
+          if (this.editUrl) {
+            params = angular.copy(this.editingRow);
+            this.loading = true;
+            params = this.adaptEdit(params);
+            params.oper = "edit";
+            return $http.get(this.editUrl, {
+              params: params
+            }).success((function(_this) {
+              return function(response) {
+                _this.getData(_this.paginator.page);
+                _this.unsetAction();
+                return _this.loading = false;
+              };
+            })(this));
+          } else {
+            return console.error("Edit url not provided!");
+          }
+        },
+        adaptEdit: function(params) {
+          var header, i, len, ref;
+          ref = this.fields;
+          for (i = 0, len = ref.length; i < len; i++) {
+            header = ref[i];
+            if (header.onOff) {
+              params[header.name] = params[header.name] ? "on" : "off";
+            }
+          }
+          return params;
         },
         deleteRow: function() {
           var par;
@@ -145,10 +230,13 @@
           return this.editingRow = row;
         },
         addHeader: function(header) {
+          var position;
+          position = this.fields.length;
           this.fields.push({
-            editAs: header.editAs,
+            onOff: header.onOff != null,
+            id: header.id != null,
             type: header.type != null ? header.type : "none",
-            position: header.position != null ? header.position : header.position = false,
+            position: position,
             required: header.required != null,
             hidden: header.hidden != null,
             edit: header.edit != null,
@@ -169,6 +257,29 @@
         },
         unsetAction: function() {
           return this.action = "";
+        },
+        deleteRow: function() {
+          var params;
+          if (this.editUrl) {
+            params = angular.copy(this.deletingRow);
+            this.loading = true;
+            params.oper = "del";
+            return $http.get(this.editUrl, {
+              params: params
+            }).success((function(_this) {
+              return function(response) {
+                _this.getData(_this.paginator.page);
+                _this.unsetAction();
+                return _this.loading = false;
+              };
+            })(this));
+          } else {
+            return console.error("Edit url not provided!");
+          }
+        },
+        setDeleteRow: function(row) {
+          this.action = "delete";
+          return this.deletingRow = row;
         }
       };
     };

@@ -1,29 +1,61 @@
 span(ng-transclude)
 div(ng-if="!grid.loading")
+  .row(ng-if="grid.add")
+    .col-xs-12
+      button.btn.btn-success(ng-click="grid.setAddingRow()" style="margin-bottom:10px") + Add      
   //FORMS
   .row
+    //ADD ROW
     form(name="addRow" ng-submit="grid.addRow() && addRow.$valid" ng-if="grid.add && grid.action=='add'")
-      .form-group(ng-repeat="header in grid.fields")
-        label {{header.label}}
-        input.form-control()
+      .col-xs-12
+        h2 Add
+      .form-group.col-xs-6(ng-repeat="header in grid.fields" ng-if='header.edit')
+        label
+          strong {{header.label}}
+        div(ng-switch="header.type")
+          div(ng-switch-when="none")
+            input.form-control(ng-model="grid.addingRow[header.name]" ng-required="header.required")
+          div(ng-switch-when="date")
+            //TODO: date selector (omg what a headache)
+            input.form-control(ng-model="grid.addingRow[header.name]" ng-required="header.required")
+          div(ng-switch-when="bool")
+            input.form-control(ng-model="grid.addingRow[header.name]" ng-required="header.required" type="checkbox")
+          div(ng-switch-when="password")
+            input.form-control(type="password" ng-model="grid.addingRow[header.name]" ng-required="header.required")
+      .clearfix
+      .col-xs-12
+        button.btn(type="submit") Save
+        button.btn(ng-click="grid.unsetAction()" type="button") Cancel
+    // EDIT ROW
     form(name="editRow" ng-submit="grid.editRow() && editRow.$valid" ng-if="grid.edit && grid.action=='edit'")
       .col-xs-12
         h2 Edit
       .form-group.col-xs-6(ng-repeat="header in grid.fields" ng-if='!header.hidden || header.edit')
         label 
           strong {{header.label}}
-        input.form-control(ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit")
+        div(ng-switch="header.type")
+          div(ng-switch-when="none")
+            input.form-control(ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit")
+          div(ng-switch-when="date")
+            // TODO: date selector (omg what a headache)
+            input.form-control(ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit")
+          div(ng-switch-when="bool")
+            input.form-control(ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit" type="checkbox")
+          div(ng-switch-when="password")
+            input.form-control(type="password" ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit")
+      
       .clearfix
       .col-xs-12
         button.btn(type="submit") Save
         button.btn(ng-click="grid.unsetAction()" type="button") Cancel
+    // DELETE ROW
     form(name="deleteRow" ng-submit="grid.deleteRow() && deleteRow.$valid" ng-if="grid.delete && grid.action=='delete'")
       .col-xs-12
         h2 Delete
       .col-xs-12
         button.btn(type="submit") Delete
         button.btn(ng-click="grid.unsetAction()" type="button") Cancel
-  //SEARCH
+  //SEARCH and ADD button
   .row(ng-if="grid.search")
     form(ng-submit="grid.getData(0)")
       .col-xs-4
@@ -44,23 +76,15 @@ div(ng-if="!grid.loading")
             th.text-right(ng-if='grid.edit')
             th.text-right(ng-if="grid.delete")
               
-        tbody
+         tbody
           tr(ng-repeat='row in grid.rows')
-            td.text-center(ng-repeat='header in grid.fields' ng-if='!header.hidden') 
-              span(ng-if="!header.position") 
-                span(ng-switch="header.type")
-                  span(ng-switch-when="date") {{row[header.name] | date}} fecha
-                  span(ng-switch-when="bool") 
-                    span(ng-if="row[header.name]") ✓
-                    span(ng-if="!row[header.name]") ✗
-                  span(ng-switch-when="none") {{row[header.name]}}
-              span(ng-if="header.position")
-                span(ng-switch="header.type")
-                  span(ng-switch-when="none") {{row[header.name][header.position]}}
-                  span(ng-switch-when="date") {{row[header.name][header.position] | date}}
-                  span(ng-switch-when="bool")
-                    span(ng-if="row[header.name]") ✓
-                    span(ng-if="!row[header.name]") ✗
+            td.text-center(ng-repeat='header in grid.fields' ng-if='!header.hidden')
+              span(ng-switch="header.type")
+                span(ng-switch-when="date") {{row[header.name] | date:'dd/MM/yyyy - HH:mm'}}
+                span(ng-switch-when="bool") 
+                  span(ng-if="row[header.name]") ✓
+                  span(ng-if="!row[header.name]") ✗
+                span(ng-switch-when="none") {{row[header.name]}}
                   
             td.text-right(ng-if='grid.edit')
               a(style='cursor:pointer;text-decoration:none' ng-click='grid.setEditingRow(row)') ✎

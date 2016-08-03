@@ -1,20 +1,34 @@
 <span ng-transclude="ng-transclude"></span>
 <div ng-if="!grid.loading">
+  <div ng-if="grid.add" class="row">
+    <div class="col-xs-12">
+      <button ng-click="grid.setAddingRow()" style="margin-bottom:10px" class="btn btn-success">+ Add      </button>
+    </div>
+  </div>
   <!--FORMS-->
   <div class="row">
+    <!--ADD ROW-->
     <form name="addRow" ng-submit="grid.addRow() &amp;&amp; addRow.$valid" ng-if="grid.add &amp;&amp; grid.action=='add'">
-      <div ng-repeat="header in grid.fields" class="form-group">
-        <label>{{header.label}}</label>
-        <input class="form-control"/>
-      </div>
-    </form>
-    <form name="editRow" ng-submit="grid.editRow() &amp;&amp; editRow.$valid" ng-if="grid.edit &amp;&amp; grid.action=='edit'">
       <div class="col-xs-12">
-        <h2>Edit</h2>
+        <h2>Add</h2>
       </div>
-      <div ng-repeat="header in grid.fields" ng-if="!header.hidden || header.edit" class="form-group col-xs-6">
-        <label> <strong>{{header.label}}</strong></label>
-        <input ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit" class="form-control"/>
+      <div ng-repeat="header in grid.fields" ng-if="header.edit" class="form-group col-xs-6">
+        <label><strong>{{header.label}}</strong></label>
+        <div ng-switch="header.type">
+          <div ng-switch-when="none">
+            <input ng-model="grid.addingRow[header.name]" ng-required="header.required" class="form-control"/>
+          </div>
+          <div ng-switch-when="date">
+            <!--TODO: date selector (omg what a headache)-->
+            <input ng-model="grid.addingRow[header.name]" ng-required="header.required" class="form-control"/>
+          </div>
+          <div ng-switch-when="bool">
+            <input ng-model="grid.addingRow[header.name]" ng-required="header.required" type="checkbox" class="form-control"/>
+          </div>
+          <div ng-switch-when="password">
+            <input type="password" ng-model="grid.addingRow[header.name]" ng-required="header.required" class="form-control"/>
+          </div>
+        </div>
       </div>
       <div class="clearfix"></div>
       <div class="col-xs-12">
@@ -22,6 +36,36 @@
         <button ng-click="grid.unsetAction()" type="button" class="btn">Cancel</button>
       </div>
     </form>
+    <!-- EDIT ROW-->
+    <form name="editRow" ng-submit="grid.editRow() &amp;&amp; editRow.$valid" ng-if="grid.edit &amp;&amp; grid.action=='edit'">
+      <div class="col-xs-12">
+        <h2>Edit</h2>
+      </div>
+      <div ng-repeat="header in grid.fields" ng-if="!header.hidden || header.edit" class="form-group col-xs-6">
+        <label> <strong>{{header.label}}</strong></label>
+        <div ng-switch="header.type">
+          <div ng-switch-when="none">
+            <input ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit" class="form-control"/>
+          </div>
+          <div ng-switch-when="date">
+            <!-- TODO: date selector (omg what a headache)-->
+            <input ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit" class="form-control"/>
+          </div>
+          <div ng-switch-when="bool">
+            <input ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit" type="checkbox" class="form-control"/>
+          </div>
+          <div ng-switch-when="password">
+            <input type="password" ng-model="grid.editingRow[header.name]" ng-required="header.required" ng-disabled="!header.edit" class="form-control"/>
+          </div>
+        </div>
+      </div>
+      <div class="clearfix"></div>
+      <div class="col-xs-12">
+        <button type="submit" class="btn">Save</button>
+        <button ng-click="grid.unsetAction()" type="button" class="btn">Cancel</button>
+      </div>
+    </form>
+    <!-- DELETE ROW-->
     <form name="deleteRow" ng-submit="grid.deleteRow() &amp;&amp; deleteRow.$valid" ng-if="grid.delete &amp;&amp; grid.action=='delete'">
       <div class="col-xs-12">
         <h2>Delete</h2>
@@ -32,7 +76,7 @@
       </div>
     </form>
   </div>
-  <!--SEARCH-->
+  <!--SEARCH and ADD button-->
   <div ng-if="grid.search" class="row">
     <form ng-submit="grid.getData(0)">
       <div class="col-xs-4">
@@ -61,7 +105,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="row in grid.rows">
-            <td ng-repeat="header in grid.fields" ng-if="!header.hidden" class="text-center"> <span ng-if="!header.position"> <span ng-switch="header.type"><span ng-switch-when="date">{{row[header.name] | date}} fecha</span><span ng-switch-when="bool"> <span ng-if="row[header.name]">✓</span><span ng-if="!row[header.name]">✗</span></span><span ng-switch-when="none">{{row[header.name]}}</span></span></span><span ng-if="header.position"><span ng-switch="header.type"><span ng-switch-when="none">{{row[header.name][header.position]}}</span><span ng-switch-when="date">{{row[header.name][header.position] | date}}</span><span ng-switch-when="bool"><span ng-if="row[header.name]">✓</span><span ng-if="!row[header.name]">✗</span></span></span></span></td>
+            <td ng-repeat="header in grid.fields" ng-if="!header.hidden" class="text-center"><span ng-switch="header.type"><span ng-switch-when="date">{{row[header.name] | date:'dd/MM/yyyy - HH:mm'}}</span><span ng-switch-when="bool"> <span ng-if="row[header.name]">✓</span><span ng-if="!row[header.name]">✗</span></span><span ng-switch-when="none">{{row[header.name]}}</span></span></td>
             <td ng-if="grid.edit" class="text-right"><a style="cursor:pointer;text-decoration:none" ng-click="grid.setEditingRow(row)">✎</a></td>
             <td ng-if="grid.delete" class="text-right"><a style="cursor:pointer;text-decoration:none" ng-click="grid.setDeleteRow(row)">⊗</a></td>
           </tr>

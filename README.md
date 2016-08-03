@@ -26,10 +26,11 @@ $scope.urlEdit = "http://api.com/edit";
 <code>hidden</code>: to hide or not this field, by default is false<br>
 <code>edit</code>: this field is editable or not, by default false<br>
 <code>search</code> : to search by this field or not, by default false<br>
-<code>position</code> : if field is on array then use this position of such array<br>
+<code>readNames</code> : use params names instead of getting the values the normal way
+<code>id</code> : this param is the id
 <code>name</code>: name of the parameter comming on the api<br>
 <code>label</code>: name visible of the parameter<br>
 <code>required</code>: if this field is required when editing<br>
 <code>type</code>:<br>
- types : <code>bool</code>,<code>date</code>,<code>password</code>,<code>none</code> (none is default)<br> <code>edit-as</code>: if you need to edit a field with a diferent parameter name you can change it here<br>
+ types : <code>bool</code>,<code>date</code>,<code>password</code>,<code>none</code> (none is default)<br>
 <code>onoff</code>: if you are using <code>type="bool"</code> onoff attribute changes the true/false value to "on"/"off" strings
