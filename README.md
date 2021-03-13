@@ -3,7 +3,7 @@ This is a Angular directive (1.x) adaptation for jQgrid:  http://www.trirand.com
 The Directive does not use jQgrid plugin, only replicates its behavior towards backend structure of a jQgrid table.
 
 <h2>Implementation</h2>
-this is a really early version (use at your own risk). I havent made a beta release yet, but im fully working on this plugin. (so keep an eye on this repo :) )<br>
+Im not working at this proyect, use at own risk<br>
 Include <code>ngGrid</code> into your module like:
 <code>myModule = angular.module('myModule', ['ngGrid'])</code><br>
 code example:
